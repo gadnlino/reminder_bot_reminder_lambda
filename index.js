@@ -1,60 +1,35 @@
-const AWS = require("aws-sdk");
-const region = "us-east-1";
-const sqs = new AWS.SQS({ region });
-const docClient = new AWS.DynamoDB.DocumentClient({ region });
+const awsSvc = require("./services/awsService.js");
+/*const dotenv = require("dotenv");
+
+dotenv.config();*/
 
 exports.handler = async (event, context) => {
 
-    const tableName = process.env.REMINDERS_BOT_TABLE || `reminder_bot_reminders`;
+    const {REMINDERS_BOT_TABLE} = process.env;    
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (_, __) => {        
 
-        const date = `${new Date().toISOString().split("T")[0]}T00:00:00.000Z`;
+        const {uuid, creation_date, rule_arn, rule_name} = JSON.parse(event);
 
-        const queryParams = {
-            TableName: tableName,
-            FilterExpression: "#yr = :date and #flag = :done",
-            ExpressionAttributeNames: {
-                "#yr": "reminder_date",
-                "#flag": "dismissed"
-            },
-            ExpressionAttributeValues: {
-                ":date": date,
-                ":done": false
-            }
-        };
+        const queryResp = await awsSvc.
+                dynamodb.queryItem(REMINDERS_BOT_TABLE, "#uuid = :id",
+                                    {"#uuid" : "uuid"}, {":id" : uuid});
+        
+        const reminder = queryResp.Items[0];
 
-        docClient.scan(queryParams, (err, data) => {
+        //TODO : POST /reminder para a api do Heroku        
 
-            if (err) {
-                reject(err);
-            }
-            else {
-                console.log(data);
+        const listTargetsResp = await awsSvc.cloudWatchEvents.listTargets(rule_name);
+        
+        const targetIds = listTargetsResp.Targets.map(t=>t.Id);
+        
+        if(targetIds.length > 0){
+            const removeTargetsResp = await awsSvc
+                            .cloudWatchEvents.removeTargets(targetIds, rule_name);
+        }
 
-                const queueURL = process.env.REMINDERS_QUEUE_URL || 
-                    `https://sqs.us-east-1.amazonaws.com/702784444557/sqs-reminders`;
-
-                data.Items.forEach(function (reminder) {
-
-                    const params = {
-                        QueueUrl: queueURL,
-                        MessageBody: JSON.stringify(reminder)
-                    };
-
-                    sqs.sendMessage(params,(err,data)=>{
-                        if(err){
-                            reject(err);
-                        }
-                        else{
-                            console.log(data);
-                        }
-                    });
-                });
-
-                resolve();
-            }
-        });
+        const deleteRuleResp = await awsSvc.cloudWatchEvents
+                                .deleteRule(rule_name);
     });
 };
 
