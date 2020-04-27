@@ -1,11 +1,11 @@
 const awsSvc = require("./services/awsService.js");
-/*const dotenv = require("dotenv");
+const dotenv = require("dotenv");
 
-dotenv.config();*/
+dotenv.config();
 
 exports.handler = async (event, context) => {
 
-    const {REMINDERS_BOT_TABLE} = process.env;    
+    const {REMINDERS_BOT_TABLE, REMINDERS_QUEUE_URL} = process.env;    
 
     return new Promise(async (_, __) => {        
 
@@ -16,8 +16,9 @@ exports.handler = async (event, context) => {
                                     {"#uuid" : "uuid"}, {":id" : uuid});
         
         const reminder = queryResp.Items[0];
-
-        //TODO : POST /reminder para a api do Heroku        
+                
+        const sendMessageResp = await awsSvc.sqs
+            .sendMessage(REMINDERS_QUEUE_URL, JSON.stringify(reminder));
 
         const listTargetsResp = await awsSvc.cloudWatchEvents.listTargets(rule_name);
         
