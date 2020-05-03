@@ -8,9 +8,7 @@ exports.handler = (event, context) => {
     const { REMINDERS_BOT_TABLE, REMINDERS_QUEUE_URL } = process.env;
 
     async function remindReminders() {
-        const { uuid, creation_date, rule_arn, rule_name } = event;
-
-        console.log(event);
+        const { uuid, rule_name } = event;
 
         const queryResp = await awsSvc.
             dynamodb.queryItem(REMINDERS_BOT_TABLE, "#uuid = :id",
@@ -36,4 +34,3 @@ exports.handler = (event, context) => {
 
     remindReminders();
 };
-
