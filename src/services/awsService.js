@@ -1,4 +1,4 @@
-const region = "us-east-1";
+const region = process.env.AWS_REGION;
 
 const AWS = require("aws-sdk");
 const sqs = new AWS.SQS({ region });
@@ -28,6 +28,17 @@ module.exports = {
             const req = sqs.receiveMessage(params);
 
             return req.promise();
+        },
+        
+        deleteMessage: async (QueueUrl, ReceiptHandle) => {
+            const params = {
+                QueueUrl,
+                ReceiptHandle
+            };
+
+            const req = sqs.deleteMessage(params);
+
+            return req.promise();
         }
     },
 
@@ -43,21 +54,6 @@ module.exports = {
 
             return req.promise();
         },
-        
-        queryItem : async (TableName, KeyConditionExpression, 
-                ExpressionAttributeNames, ExpressionAttributeValues)=>{
-            const params = {
-                TableName,
-                KeyConditionExpression,
-                ExpressionAttributeNames,
-                ExpressionAttributeValues
-            };
-
-            const req = docClient.query(params);
-
-            return req.promise();
-        },
-
         queryItems: async (TableName,
             FilterExpression,
             ExpressionAttributeNames,
@@ -106,29 +102,6 @@ module.exports = {
 
             return req.promise();
         },
-
-        deleteRule : async (Name)=>{
-
-            const params = {
-                Name
-            };
-
-            const req = cwevents.deleteRule(params);
-
-            return req.promise();
-        },
-
-        describeRule : async (Name)=>{
-
-            const params = {
-                Name
-            };
-
-            const req = cwevents.describeRule(params);
-
-            return req.promise();
-        },
-
         putTargets : async (Rule, Targets)=>{
 
             const params = {
@@ -137,29 +110,6 @@ module.exports = {
             };
 
             const req = cwevents.putTargets(params);
-
-            return req.promise();
-        },
-
-        listTargets : async (Rule) =>{
-
-            const params = {
-                Rule
-            };
-
-            const req = cwevents.listTargetsByRule(params);
-
-            return req.promise();
-        },
-
-        removeTargets : async (Ids, Rule)=>{
-
-            const params = {
-                Ids,
-                Rule
-            };
-
-            const req = cwevents.removeTargets(params);
 
             return req.promise();
         }

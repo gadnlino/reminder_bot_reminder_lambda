@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 const awsSvc = require("./services/awsService.js");
 /*const dotenv = require("dotenv");
 
@@ -34,3 +35,8 @@ exports.handler = (event, context) => {
 
     remindReminders();
 };
+=======
+const func = require("./src/function.js");
+
+exports.handler = func;
+>>>>>>> Stashed changes
