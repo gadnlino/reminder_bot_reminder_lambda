@@ -1,4 +1,5 @@
-const awsSvc = require("./src/services/awsService.js");
+const awsSvc = require("./services/awsService.js");
+const helpers = require("./helpers/helpers.js");
 /*const dotenv = require("dotenv");
 
 dotenv.config();*/
@@ -11,7 +12,7 @@ module.exports = async (event, context)=>{
         const {uuid, creation_date, rule_arn, rule_name} = event;
 
         const queryResp = await awsSvc.
-                dynamodb.queryItem(REMINDERS_BOT_TABLE, "#uuid = :id",
+                dynamodb.queryItems(REMINDERS_BOT_TABLE, "#uuid = :id",
                                    {"#uuid" : "uuid"}, {":id" : uuid});
         
         const reminder = queryResp.Items[0];
@@ -30,5 +31,7 @@ module.exports = async (event, context)=>{
 
         const deleteRuleResp = await awsSvc.cloudWatchEvents
                                 .deleteRule(rule_name);
+        
+        helpers.sendReminderEmail(reminder);
     });
 }

@@ -1,3 +1,6 @@
+const dotenv = require("dotenv");
+dotenv.config();
+
 const region = process.env.AWS_REGION;
 
 const AWS = require("aws-sdk");
@@ -29,7 +32,7 @@ module.exports = {
 
             return req.promise();
         },
-        
+
         deleteMessage: async (QueueUrl, ReceiptHandle) => {
             const params = {
                 QueueUrl,
@@ -102,7 +105,18 @@ module.exports = {
 
             return req.promise();
         },
-        putTargets : async (Rule, Targets)=>{
+
+        deleteRule: async (RuleName) => {
+            var params = {
+                Name: RuleName
+            };
+            
+            const req = cwevents.deleteRule(params);
+
+            return req.promise();
+        },
+
+        putTargets: async (Rule, Targets) => {
 
             const params = {
                 Rule,
@@ -110,6 +124,27 @@ module.exports = {
             };
 
             const req = cwevents.putTargets(params);
+
+            return req.promise();
+        },
+
+        listTargets: async (RuleName) => {
+            var params = {
+                Rule: RuleName
+            };
+
+            const req = cwevents.listTargetsByRule(params);
+
+            return req.promise();
+        },
+
+        removeTargets: async (TargetIds, RuleName) => {
+            var params = {
+                Ids: TargetIds,
+                Rule: RuleName
+            };
+
+            const req = cwevents.removeTargets(params);
 
             return req.promise();
         }
