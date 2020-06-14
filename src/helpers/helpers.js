@@ -5,6 +5,7 @@ const sgSvc = require("../services/sendgridService.js");
 const awsSvc = require("../services/awsService.js");
 
 module.exports = {
+
   sendReminderEmail: async (reminder) => {
 
     const { SENDGRID_REMINDER_TEMPLATE_ID, SERVICE_EMAIL, SUBSCRIPTIONS_TABLE } = process.env;
@@ -41,4 +42,6 @@ module.exports = {
       });
     }
   }
+
+  
 }

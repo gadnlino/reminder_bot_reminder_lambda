@@ -57,6 +57,18 @@ module.exports = {
 
             return req.promise();
         },
+
+        deleteItem : async (TableName, Key)=>{
+
+            var params = {
+                TableName, Key
+            };
+
+            const req = docClient.delete(params);
+
+            return req.promise();
+        },
+
         queryItems: async (TableName,
             FilterExpression,
             ExpressionAttributeNames,
@@ -161,6 +173,27 @@ module.exports = {
             };
 
             const req = lambda.addPermission(params);
+
+            return req.promise();
+        },
+
+        getPolicy : async (FunctionName)=>{
+            var params = {FunctionName};
+
+            const req = lambda.getPolicy(params);
+
+            return req.promise();
+        },
+
+        removePermission: async (FunctionName, StatementId) => {
+            var params = {
+                FunctionName,
+                StatementId,
+                // Qualifier: 'STRING_VALUE',
+                // RevisionId: 'STRING_VALUE'
+            };
+
+            const req = lambda.removePermission(params);
 
             return req.promise();
         }
