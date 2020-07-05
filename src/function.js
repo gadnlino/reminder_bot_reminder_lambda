@@ -1,13 +1,15 @@
 const awsSvc = require("./services/awsService.js");
 const helpers = require("./helpers/helpers.js");
-/*const dotenv = require("dotenv");
+const dotenv = require("dotenv");
 
-dotenv.config();*/
+dotenv.config();
 
 module.exports = async (event, context) => {
     const { REMINDERS_BOT_TABLE, REMINDERS_QUEUE_URL, PERSISTENCE_QUEUE_URL } = process.env;
 
     return new Promise(async (_, __) => {
+
+        console.log(JSON.stringify(event));
 
         const { uuid, rule_name } = event;
 

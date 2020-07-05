@@ -13,9 +13,7 @@ module.exports = {
             templateId,
             dynamic_template_data: templateData
         };
-
-        //const response = sgMail.send(msg);
-        
+                
         return sgMail.send(msg);
     }
 };
