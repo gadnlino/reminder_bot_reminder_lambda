@@ -1,18 +1,14 @@
-const dotenv = require("dotenv");
-dotenv.config();
-
-const sgSvc = require("../services/sendgridService.js");
 const awsSvc = require("../services/awsService.js");
+const config = require("../config.js");
 
 module.exports = {
 
   sendReminderEmail: async (reminder) => {
 
-    const { SENDGRID_REMINDER_TEMPLATE_ID, SERVICE_EMAIL, SUBSCRIPTIONS_TABLE } = process.env;
     const { username, body } = reminder;
 
     const queryResp = await awsSvc.dynamodb.queryItems(
-      SUBSCRIPTIONS_TABLE,
+      config.subscriptionsTableName,
       "#id = :value",
       { "#id": "username" },
       { ":value": username }
@@ -29,16 +25,11 @@ module.exports = {
           reminderBody: body
         };
 
-        const response = await sgSvc.sendMail(
-          email,
-          SERVICE_EMAIL,
-          SENDGRID_REMINDER_TEMPLATE_ID,
-          templateData
-        );
-
-        if(response[0].statusCode <= 299 && response[0].statusCode >= 200){
-          console.log("Email sent!");
-        }
+        await awsSvc.sqs.sendMessage(config.emailQueueUrl, JSON.stringify({
+          type: "SEND_REMINDER",
+          recipientEmail: email,
+          parameters: templateData
+        }));
       });
     }
   }
